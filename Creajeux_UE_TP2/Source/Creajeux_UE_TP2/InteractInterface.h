@@ -28,8 +28,7 @@ public:
 	void InteractBP();
 
 	//CPP ONLY callable function. =0 means nothing in .cpp
-	// UFUNCTION is still necessary
-	UFUNCTION()
-	virtual void InteractCPP() = 0;
+	//if you want a default behavior in the cpp remove =0 and add the function to the cpp
+	virtual void InteractCPP()=0;
 
 };
