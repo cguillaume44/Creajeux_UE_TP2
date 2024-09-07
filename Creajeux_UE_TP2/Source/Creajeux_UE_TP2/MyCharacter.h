@@ -27,6 +27,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ReleaseObj();
 
+	UPROPERTY(EditDefaultsOnly)
+	float SightLenght = 300.f;
+
+	void CheckSight();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +39,12 @@ protected:
 	//In protected
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	class UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Physic Handle")
+	class UPhysicsHandleComponent* HandleCompo;
+
+	FHitResult OutHit;
+	FVector TargetLoc;
 
 public:	
 	// Called every frame
