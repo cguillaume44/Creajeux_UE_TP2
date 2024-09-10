@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InteractInterface.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
-class CREAJEUX_UE_TP2_API AMyCharacter : public ACharacter
+class CREAJEUX_UE_TP2_API AMyCharacter : public ACharacter, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -53,4 +54,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	AActor* ActorInSight = nullptr;
+	void ResetActorInSight();
+	bool IsImplementingInteractInterface(AActor* Actor);
 };

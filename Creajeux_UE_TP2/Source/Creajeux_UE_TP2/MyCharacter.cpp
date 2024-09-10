@@ -24,6 +24,10 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::Interact()
 {
 	UE_LOG(LogTemp, Warning, TEXT("interact"));
+	if (ActorInSight)
+	{
+		IInteractInterface::Execute_PressButton(ActorInSight);
+	}
 }
 
 void AMyCharacter::Scroll(float Direction)
@@ -35,7 +39,7 @@ void AMyCharacter::StartHoldObj()
 {
 	UE_LOG(LogTemp, Warning, TEXT("hold"));
 
-	if (HandleCompo && OutHit.GetComponent())
+	if (HandleCompo && OutHit.GetComponent() && OutHit.GetActor()->ActorHasTag("Grabbable"))
 	{
 		//To use the UPhysicsHandleComponent the grabbed component must simulate physic
 		OutHit.GetComponent()->SetSimulatePhysics(true);
@@ -59,16 +63,28 @@ void AMyCharacter::CheckSight()
 
 	//Line trace by channel
 	FCollisionQueryParams TraceParams;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(OutHit,CameraComponent->GetComponentLocation(),TargetLoc,ECC_Visibility,TraceParams);
-	if (bHit)
-	{
-		//DrawDebugLine(GetWorld(),OutHit.TraceStart,OutHit.Location,	FColor::Green,false, 10.0f, 0,2.0f);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(OutHit, CameraComponent->GetComponentLocation(), TargetLoc, ECC_Visibility, TraceParams);
 
-		if (OutHit.GetActor())
+	//Check if we have a valid actor hit that implements the interface
+	//In C++, the logical AND operator (&&) evaluates expressions from left to right and uses short-circuit evaluation. 
+	//This means that if the first condition is false, the second condition is not evaluated.
+	//Here we use getclass>ImplementsInterface to ensure the BP actor has the class, if you try to cast it won't work.
+	if (bHit && OutHit.GetActor() && IsImplementingInteractInterface(OutHit.GetActor()))
+	{
+		if (OutHit.GetActor() != ActorInSight)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *OutHit.GetActor()->GetName());
+			ResetActorInSight();
+			ActorInSight = OutHit.GetActor();
+			IInteractInterface::Execute_LookAt(ActorInSight);
 		}
+		//Do nothing if the actor is the same
 	}
+	else
+	{
+		//If we don't hit anything or an actor without interface, we reset the actor in sight
+		ResetActorInSight();
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -100,5 +116,24 @@ void AMyCharacter::Tick(float DeltaTime)
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AMyCharacter::ResetActorInSight()
+{
+	if (ActorInSight && IsImplementingInteractInterface(ActorInSight))
+	{
+			IInteractInterface::Execute_StopLookAt(ActorInSight);
+	}
+	//Unset the actor in sight, used in CheckSight() and in interact()
+	ActorInSight = nullptr;
+}
+
+bool AMyCharacter::IsImplementingInteractInterface(AActor* Actor)
+{
+	if (Actor && Actor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
+	{
+		return true;
+	}
+	return false;
 }
 
