@@ -18,8 +18,7 @@ public:
 	UPROPERTY()
 	USceneComponent* Root;
 
-	//create a billboard component
-	UPROPERTY()
+	UPROPERTY(VisibleDefaultsOnly, Category = "Simon Manager")
 	UBillboardComponent* Billboard;
 
 protected:
@@ -52,7 +51,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Simon Button")
 	TArray<class ASimon_Button*> Sequence3;
 
-	//create a uproperty sound cue
 	UPROPERTY(EditAnywhere, Category = "Simon Sound")
 	class USoundBase* SimonSound;
 
@@ -64,7 +62,7 @@ public:
 
 	void TriggerWinProcess();
 
-	//create a function that return a ASimon_button pointer array depending on the sequence number
+	//Function that return a ASimon_button pointer array depending on the sequence number
 	TArray<class ASimon_Button*> GetSequence(int32 SequenceNumber);
 
 };
