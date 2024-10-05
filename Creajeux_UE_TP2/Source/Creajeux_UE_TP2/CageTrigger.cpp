@@ -54,7 +54,11 @@ void ACageTrigger::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (OtherActor && (OtherActor != this) && OtherActor->ActorHasTag("Grabbable"))
 	{
-		if (MovingActorRef)
+		//check if GetOverlappingActors returns 0
+		TArray<AActor*> OverlappingActors;
+		GetOverlappingActors(OverlappingActors);
+
+		if (MovingActorRef && !IsOverlappingActor(this) && OverlappingActors.Num()==0)
 		{
 			InterpTargetLocation = TargetLocation;
 			bIsInterpolating = true;
