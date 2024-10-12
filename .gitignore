@@ -72,3 +72,11 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+Creajeux_UE_TP2/Binaries/
+
+Creajeux_UE_TP2/Intermediate/
+
+Creajeux_UE_TP2/Saved/
+
+Creajeux_UE_TP2/Content/__ExternalActors__/
