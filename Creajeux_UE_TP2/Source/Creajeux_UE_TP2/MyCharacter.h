@@ -14,6 +14,12 @@ public:
 	// Sets default values for this character's properties
 	AMyCharacter();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
@@ -26,19 +32,30 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Release();
 
+	UPROPERTY(EditDefaultsOnly, Category = "My chara")
+	float HoldDistance = 200;
+
+	UPROPERTY(EditDefaultsOnly, Category = "My chara")
+	float SightLength = 400;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//In protected
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* CameraComponent;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(EditDefaultsOnly, Category = "Physic Handle")
+	class UPhysicsHandleComponent* HandleCompo;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void UpdtadeHandleLocation();
 
+	void CheckSight();
+
+	bool CanGrabActor(FHitResult Hit);
+
+private:
+	bool bSavedPhysSim;
+	FHitResult SightRaycast;
+	FVector CamPos;
 };

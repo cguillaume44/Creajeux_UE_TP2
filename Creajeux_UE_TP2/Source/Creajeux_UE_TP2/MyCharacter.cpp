@@ -3,6 +3,9 @@
 
 #include "MyCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "DrawDebugHelpers.h"
+
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -13,6 +16,9 @@ AMyCharacter::AMyCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	CameraComponent->SetupAttachment(GetMesh());
 	CameraComponent->bUsePawnControlRotation = true;
+
+	//Create the physic handle compo
+	HandleCompo = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("HandleCompo"));
 }
 
 void AMyCharacter::Interact()
@@ -28,11 +34,30 @@ void AMyCharacter::Scroll(float Direction)
 void AMyCharacter::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("hold"));
+	if (CanGrabActor(SightRaycast))
+	{
+		UPrimitiveComponent* HitComponent = SightRaycast.GetComponent();
+		bSavedPhysSim = HitComponent->IsSimulatingPhysics();
+		HitComponent->SetPhysicsMaxAngularVelocityInDegrees(100);
+		HitComponent->SetSimulatePhysics(true);
+		HitComponent->WakeAllRigidBodies();
+		HandleCompo->GrabComponentAtLocation(
+			HitComponent,
+			NAME_None,
+			SightRaycast.ImpactPoint);
+	}
 }
 
 void AMyCharacter::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("release"));
+	if (HandleCompo && HandleCompo->GetGrabbedComponent())
+	{
+		HandleCompo->GetGrabbedComponent()->SetSimulatePhysics(bSavedPhysSim);
+		//Reset the default angular velocity
+		HandleCompo->GetGrabbedComponent()->SetPhysicsMaxAngularVelocityInDegrees(3600.f);
+		HandleCompo->ReleaseComponent();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +72,9 @@ void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CamPos = CameraComponent->GetComponentLocation();
+	CheckSight();
+	UpdtadeHandleLocation();
 }
 
 // Called to bind functionality to input
@@ -54,5 +82,38 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AMyCharacter::UpdtadeHandleLocation()
+{
+	//Updtade the handle compo target location
+	FVector HandleLocation = CamPos + CameraComponent->GetForwardVector() * HoldDistance;
+	HandleCompo->SetTargetLocation(HandleLocation);
+	//Draw a debub point at the handle location
+	DrawDebugPoint(GetWorld(), HandleLocation, 10, FColor::Green, false, 0);
+}
+
+void AMyCharacter::CheckSight()
+{
+	//Line trace by channel
+	FCollisionQueryParams TraceParams;
+	FVector End = CamPos + CameraComponent->GetForwardVector() * SightLength;
+	GetWorld()->LineTraceSingleByChannel(SightRaycast, CamPos, End, ECC_Visibility, TraceParams);
+	DrawDebugSphere(GetWorld(),
+		SightRaycast.bBlockingHit ? SightRaycast.Location : SightRaycast.TraceEnd,
+		10, 10,
+		SightRaycast.bBlockingHit ? FColor::Blue : FColor::Red, false, 0);
+}
+
+bool AMyCharacter::CanGrabActor(FHitResult Hit)
+{
+	if (SightRaycast.GetComponent() &&
+		SightRaycast.bBlockingHit &&
+		SightRaycast.GetComponent()->Mobility == EComponentMobility::Movable)
+	{
+		return true;
+	}
+
+	return false;
 }
 
