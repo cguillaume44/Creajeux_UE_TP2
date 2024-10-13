@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InteractInterface.h"
 #include "MyCharacter.generated.h"
 
 UCLASS()
-class CREAJEUX_UE_TP2_API AMyCharacter : public ACharacter
+class CREAJEUX_UE_TP2_API AMyCharacter : public ACharacter, public IInteractInterface
 {
 	GENERATED_BODY()
 public:
@@ -54,8 +55,13 @@ protected:
 
 	bool CanGrabActor(FHitResult Hit);
 
+
+
 private:
 	bool bSavedPhysSim;
 	FHitResult SightRaycast;
 	FVector CamPos;
+	AActor* ActorInSight = nullptr;
+	void ResetActorInSight();
+	bool IsImplementingInteractInterface(AActor* Actor);
 };

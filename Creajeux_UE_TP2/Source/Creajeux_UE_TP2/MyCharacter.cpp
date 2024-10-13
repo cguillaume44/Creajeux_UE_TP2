@@ -24,11 +24,19 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::Interact()
 {
 	UE_LOG(LogTemp, Warning, TEXT("interact"));
+	if (ActorInSight && IsImplementingInteractInterface(ActorInSight))
+	{
+		IInteractInterface::Execute_PressButton(ActorInSight);
+	}
 }
 
 void AMyCharacter::Scroll(float Direction)
 {
 	UE_LOG(LogTemp, Warning, TEXT("scroll %f"), Direction);
+
+	// Update & Clamp HoldDistance between 50 and 500
+	HoldDistance = FMath::Clamp(HoldDistance + Direction * 10.0f, 50.0f, 500.0f);
+
 }
 
 void AMyCharacter::Grab()
@@ -45,6 +53,7 @@ void AMyCharacter::Grab()
 			HitComponent,
 			NAME_None,
 			SightRaycast.ImpactPoint);
+		HandleCompo->GetGrabbedComponent()->GetOwner()->Tags.Add("Held");
 	}
 }
 
@@ -56,6 +65,7 @@ void AMyCharacter::Release()
 		HandleCompo->GetGrabbedComponent()->SetSimulatePhysics(bSavedPhysSim);
 		//Reset the default angular velocity
 		HandleCompo->GetGrabbedComponent()->SetPhysicsMaxAngularVelocityInDegrees(3600.f);
+		HandleCompo->GetGrabbedComponent()->GetOwner()->Tags.Remove("Held");
 		HandleCompo->ReleaseComponent();
 	}
 }
@@ -103,17 +113,46 @@ void AMyCharacter::CheckSight()
 		SightRaycast.bBlockingHit ? SightRaycast.Location : SightRaycast.TraceEnd,
 		10, 10,
 		SightRaycast.bBlockingHit ? FColor::Blue : FColor::Red, false, 0);
+
+	if (SightRaycast.bBlockingHit && SightRaycast.GetActor() && IsImplementingInteractInterface(SightRaycast.GetActor()))
+	{
+		if (SightRaycast.GetActor() != ActorInSight && !SightRaycast.GetActor()->ActorHasTag("Held"))
+		{
+			ResetActorInSight();
+			ActorInSight = SightRaycast.GetActor();
+			IInteractInterface::Execute_LookAt(ActorInSight);
+		}
+		//Do nothing if the actor is the same
+	}
+	else
+	{
+		//If we don't hit anything or an actor without interface, we reset the actor in sight
+		ResetActorInSight();
+	}
 }
 
 bool AMyCharacter::CanGrabActor(FHitResult Hit)
 {
-	if (SightRaycast.GetComponent() &&
+	return SightRaycast.GetComponent() &&
 		SightRaycast.bBlockingHit &&
-		SightRaycast.GetComponent()->Mobility == EComponentMobility::Movable)
+		IsImplementingInteractInterface(Hit.GetActor()) &&
+		SightRaycast.GetActor()->ActorHasTag("Grabbable");
+}
+void AMyCharacter::ResetActorInSight()
+{
+	if (ActorInSight && IsImplementingInteractInterface(ActorInSight))
 	{
-		return true;
+		IInteractInterface::Execute_StopLookAt(ActorInSight);
 	}
-
-	return false;
+	//Unset the actor in sight, used in CheckSight() and in interact()
+	ActorInSight = nullptr;
 }
 
+bool AMyCharacter::IsImplementingInteractInterface(AActor* Actor)
+{
+	if (Actor)
+	{
+		return Actor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass());
+	}
+	return false;
+}
