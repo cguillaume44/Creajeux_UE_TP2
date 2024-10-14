@@ -51,9 +51,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Simon Button")
 	TArray<class ASimon_Button*> Sequence3;
 
-	UPROPERTY(EditAnywhere, Category = "Simon Sound")
-	class USoundBase* SimonSound;
-
 	void ButtonPressed(class ASimon_Button* Button);
 
 	void PlaySequence();
@@ -64,5 +61,9 @@ public:
 
 	//Helper Function that return a ASimon_button pointer array depending on the sequence number
 	TArray<class ASimon_Button*> GetSequence(int32 SequenceNumber);
+
+	//Pointer to a door actor object in the level
+	UPROPERTY(EditAnywhere, Category = "Simon")
+	class ADoor* DoorActor;
 
 };

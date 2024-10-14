@@ -2,6 +2,7 @@
 
 
 #include "ScalePuzzle.h"
+#include "Door.h"
 
 AScalePuzzle::AScalePuzzle()
 {
@@ -27,6 +28,10 @@ void AScalePuzzle::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 		//the remap is used in the setpercent of the progress bar
 		float TempWeight = currentWeight / targetWeight;
 		OnWeightChanged(TempWeight, SetBarColor(TempWeight));
+		if (DoorActor && currentWeight == targetWeight)
+		{
+			DoorActor->CheckOpenDoor();
+		}
 	}
 }
 
