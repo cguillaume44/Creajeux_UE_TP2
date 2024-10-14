@@ -5,6 +5,7 @@
 #include "Components/BillboardComponent.h"
 #include "Simon_Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "Door.h"
 
 // Sets default values
 ASimon_Manager::ASimon_Manager()
@@ -175,11 +176,6 @@ void ASimon_Manager::checkSequence()
 void ASimon_Manager::TriggerWinProcess()
 {
 	UE_LOG(LogTemp, Warning, TEXT("WIN!!!!"));
-	//play the sound cue
-	if (SimonSound)
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), SimonSound);
-	}
 	
 	//destroy all the simon_button and then destroy the manager
 	TArray<AActor*> FoundActors;
@@ -193,7 +189,11 @@ void ASimon_Manager::TriggerWinProcess()
 		}
 
 	}
-	//TODO later: send the message to open the door.
+	//Send the message to open the door.
+	if (DoorActor)
+	{
+		DoorActor->CheckOpenDoor();
+	}
 
 	Destroy();
 

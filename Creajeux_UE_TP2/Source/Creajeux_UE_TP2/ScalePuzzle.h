@@ -39,5 +39,9 @@ public:
 	void OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor);
 
 	FColor SetBarColor(float weight);
+
+	//Pointer to a door actor object in the level
+	UPROPERTY(EditAnywhere, Category = "My chara")
+	class ADoor* DoorActor;
 	
 };
