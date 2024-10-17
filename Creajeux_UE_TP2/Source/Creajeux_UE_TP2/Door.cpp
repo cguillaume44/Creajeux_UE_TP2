@@ -2,6 +2,9 @@
 
 
 #include "Door.h"
+#include "SoundManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameModeBase.h"
 
 // Sets default values
 ADoor::ADoor()
@@ -27,7 +30,11 @@ ADoor::ADoor()
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+    AGameModeBase* GameMode = UGameplayStatics::GetGameMode(this);
+    if (GameMode)
+    {
+        SoundManager = GameMode->GetComponentByClass<USoundManager>();
+    }
 }
 
 // Called every frame
@@ -60,6 +67,7 @@ void ADoor::CheckOpenDoor()
 	{
 		bDoorOpen = true;
         OnDoorTrigger();
+        SoundManager->PlayWinSound();
 	}
 }
 

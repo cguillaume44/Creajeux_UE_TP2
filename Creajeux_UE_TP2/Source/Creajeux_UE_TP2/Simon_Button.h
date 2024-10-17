@@ -34,13 +34,21 @@ protected:
 	virtual void BeginPlay() override;
 
 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//create a color variable to store the color of the button
+	//Color variable to store the color of the button
 	UPROPERTY(EditAnywhere, Category = "Simon Button")
 	FLinearColor ButtonColor;
+
+	UPROPERTY(EditAnywhere, Category = "Simon Button", meta = (ClampMin = 0.4, ClampMax = 1.5))
+	float SoundPitch = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Simon Button")
+	bool bPlaySound=true;
+
 
 	//implement the pressbutton function from the interface
 	virtual void PressButton_Implementation() override;
@@ -55,5 +63,11 @@ public:
 	void LightDown();
 
 	void PressAnim();
+
+	void Sound();
+
+	class USoundManager* SoundManager;
+
+
 
 };

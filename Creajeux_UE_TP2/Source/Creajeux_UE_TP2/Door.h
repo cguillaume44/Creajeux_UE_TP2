@@ -51,4 +51,6 @@ private:
 	float TimeElapsed = 0.0f;
 
 	void RotateDoors(float DeltaTime);
+	
+	class USoundManager* SoundManager;
 };
