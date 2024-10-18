@@ -81,7 +81,9 @@ void AFallingPlat_Manager::RefreshPreview()
 			}
 			//define the debug sphere color depending on the platform being fake or not
 			FColor SphereColor = bIsFake ? FColor::Red : FColor::Green;
-			DrawDebugSphere(GetWorld(), FallingPlat->GetActorLocation(), 50.0f, 12, SphereColor, true, 0.0f, 0, 1.0f);
+			FVector SphereLocation = FallingPlat->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+
+			DrawDebugSphere(GetWorld(), SphereLocation, 50.0f, 12, SphereColor, true, 0.0f, 0, 1.0f);
 		}
 	}
 }
