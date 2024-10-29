@@ -29,6 +29,8 @@ public:
 	UFUNCTION(CallInEditor, Category = "Falling Platforms")
 	void RefreshPreview();
 
+	void UpdateSequenceIndex(int32 InSequenceIndex);
+
 protected:
 	//override the construction script
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -40,6 +42,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(VisibleAnywhere, Category = "Falling Platforms")
 	int32 RandomSequenceIndex;
 
 };

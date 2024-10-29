@@ -26,6 +26,16 @@ ADoor::ADoor()
 
 }
 
+void ADoor::SkipOpendoor()
+{
+	if (!bDoorOpen)
+	{
+		bDoorOpen = true;
+		TimeElapsed = RotationDuration;
+		RotateDoors(0.0f);
+	}
+}
+
 // Called when the game starts or when spawned
 void ADoor::BeginPlay()
 {
@@ -35,6 +45,16 @@ void ADoor::BeginPlay()
     {
         SoundManager = GameMode->GetComponentByClass<USoundManager>();
     }
+}
+
+void ADoor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (!DoorGUID.IsValid())
+	{
+		DoorGUID = FGuid::NewGuid();
+	}
 }
 
 // Called every frame

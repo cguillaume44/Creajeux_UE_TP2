@@ -33,9 +33,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bIsFakeSeq2 = false;
 
+	//create a GUID uproperty called GrabGUID
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grab")
+	FGuid PlatGUID;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	//call on construction script
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:	
 	// Called every frame

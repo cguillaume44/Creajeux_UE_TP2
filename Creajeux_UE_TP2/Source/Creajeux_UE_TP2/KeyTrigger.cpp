@@ -6,6 +6,7 @@
 #include "MyCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "TempleRaiderGM.h"
 
 // Constructor
 AKeyTrigger::AKeyTrigger()
@@ -33,6 +34,9 @@ void AKeyTrigger::BeginPlay()
 
 	// Bind the OnOverlapBegin function to the BeginOverlap event
 	OnActorBeginOverlap.AddDynamic(this, &AKeyTrigger::OnOverlapBegin);
+
+	//get the GM and save it
+	GM = Cast<ATempleRaiderGM>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 void AKeyTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
@@ -41,18 +45,20 @@ void AKeyTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag("Key"))
 	{
 		AttachKeyAndCount(OtherActor);
-
+		GM->TreasureIndex++;
 		// Implement your logic here, for example, interacting with the DoorActor
 		if (DoorActor && KeyCount>=4)
 		{
 			// Call a function on the DoorActor, e.g., OpenDoor()
 			DoorActor->CheckOpenDoor();
-			//Possible to get all the actor with key tag but it's better to destroy only the one for this door
-			TArray<AActor*> AttachedActors;
-			GetAttachedActors(AttachedActors);
-			for (AActor* Actor : AttachedActors)
+			TArray<AActor*> Keys;
+			UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Key", Keys);
+			for (AActor* Key : Keys)
 			{
-				Actor->Destroy();
+				if (Key)
+				{
+					Key->Destroy();
+				}
 			}
 			//Destroy the key trigger
 			Destroy();

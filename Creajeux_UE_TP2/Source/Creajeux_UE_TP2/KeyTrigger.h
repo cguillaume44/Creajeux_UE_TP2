@@ -18,6 +18,8 @@ public:
 	// Constructor
 	AKeyTrigger();
 
+	int32 KeyCount = 0;
+
 protected:
 	// Static mesh components
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -36,7 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Default")
 	class ADoor* DoorActor;
 
-	int32 KeyCount = 0;
+	//Pointer to a the GM
+	UPROPERTY(EditAnywhere, Category = "Default")
+	class ATempleRaiderGM* GM;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

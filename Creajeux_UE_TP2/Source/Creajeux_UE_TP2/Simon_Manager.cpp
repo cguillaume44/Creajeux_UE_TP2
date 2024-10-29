@@ -6,6 +6,7 @@
 #include "Simon_Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "Door.h"
+#include "TempleRaiderGM.h"
 
 // Sets default values
 ASimon_Manager::ASimon_Manager()
@@ -177,6 +178,13 @@ void ASimon_Manager::TriggerWinProcess()
 {
 	UE_LOG(LogTemp, Warning, TEXT("WIN!!!!"));
 	
+	//get the game mode of class TempleRaiderGM and set the simon solved to true
+	ATempleRaiderGM* GM = Cast<ATempleRaiderGM>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM)
+	{
+		GM->bSimonSolved = true;
+	}
+
 	//destroy all the simon_button and then destroy the manager
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASimon_Button::StaticClass(), FoundActors);

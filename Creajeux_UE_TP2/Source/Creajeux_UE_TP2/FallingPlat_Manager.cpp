@@ -32,23 +32,7 @@ void AFallingPlat_Manager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//set a random sequence index between 0 and 2, must be updated depending on GD
-	RandomSequenceIndex = FMath::RandRange(0, 2);
-
-	//More elegant ways can be used for this, but for the sake of simplicity we will 
-	//loop through all the actors of the FallingPlat class and set the sequence index
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFallingPlat::StaticClass(), FoundActors);
-
-	for (AActor* Actor : FoundActors)
-	{
-		AFallingPlat* FallingPlat = Cast<AFallingPlat>(Actor);
-		if (FallingPlat)
-		{
-			FallingPlat->SequenceIndex = RandomSequenceIndex;
-		}
-	}
-	
+	UpdateSequenceIndex(FMath::RandRange(0, 2));
 }
 
 // Called every frame
@@ -84,6 +68,26 @@ void AFallingPlat_Manager::RefreshPreview()
 			FVector SphereLocation = FallingPlat->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
 
 			DrawDebugSphere(GetWorld(), SphereLocation, 50.0f, 12, SphereColor, true, 0.0f, 0, 1.0f);
+		}
+	}
+}
+
+void AFallingPlat_Manager::UpdateSequenceIndex(int32 InSequenceIndex)
+{
+
+	//Set the random sequence index
+	RandomSequenceIndex = InSequenceIndex;
+	//More elegant ways can be used for this, but for the sake of simplicity we will 
+	//loop through all the actors of the FallingPlat class and set the sequence index
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFallingPlat::StaticClass(), FoundActors);
+
+	for (AActor* Actor : FoundActors)
+	{
+		AFallingPlat* FallingPlat = Cast<AFallingPlat>(Actor);
+		if (FallingPlat)
+		{
+			FallingPlat->SequenceIndex = RandomSequenceIndex;
 		}
 	}
 }

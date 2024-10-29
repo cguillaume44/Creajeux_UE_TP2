@@ -27,6 +27,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	float RotationDuration = 3.0f;
 
+	bool bDoorOpen = false;
+
+	//create a GUID uproperty called GrabGUID
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grab")
+	FGuid DoorGUID;
+
+	void SkipOpendoor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,7 +41,10 @@ protected:
 
 	FTimerHandle RotationTimerHandle;
 
-	bool bDoorOpen = false;
+	//call the construction script
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+
 
 public:	
 	// Called every frame

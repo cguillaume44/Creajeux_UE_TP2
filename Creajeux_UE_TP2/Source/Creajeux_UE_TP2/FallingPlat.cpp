@@ -4,6 +4,7 @@
 #include "FallingPlat.h"
 #include "GameFramework/Character.h"
 #include "Components/BoxComponent.h"
+#include "TempleRaiderGM.h"
 
 // Sets default values
 AFallingPlat::AFallingPlat()
@@ -32,6 +33,15 @@ void AFallingPlat::BeginPlay()
 	
 }
 
+void AFallingPlat::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	if (!PlatGUID.IsValid())
+	{
+		PlatGUID = FGuid::NewGuid();
+	}
+}
+
 // Called every frame
 void AFallingPlat::Tick(float DeltaTime)
 {
@@ -45,6 +55,14 @@ void AFallingPlat::OnTriggerOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	//destroy the actor if the other actor is the player character and the bool status is true
 	if (FindStatus(SequenceIndex) && OtherActor->IsA(ACharacter::StaticClass()))
 	{
+		//get the game mode and cast it to the temple raider game mode
+		ATempleRaiderGM* GM = Cast<ATempleRaiderGM>(GetWorld()->GetAuthGameMode());
+		if (GM)
+		{
+			//add the destroyed plat to the array
+			GM->DestroyedPlats.Add(PlatGUID);
+		}
+
 		//Wait for 1 second before destroying the actor
 		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AFallingPlat::DelayedDestroyActor, 0.1f, false);
