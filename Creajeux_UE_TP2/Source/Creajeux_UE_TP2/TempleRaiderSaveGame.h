@@ -16,35 +16,35 @@ class CREAJEUX_UE_TP2_API UTempleRaiderSaveGame : public USaveGame
 
 public:
 	//create a transform variable called PlayerTransform
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	FTransform PlayerTransform;
 
 	//create a map called grabable max based on a guid and a transform
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	TMap<FGuid, FTransform> GrabableMax;
 
 	//create a transform variable called PlayerTransform
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	FRotator PlayerRotation;
 
 	//create a map with GUID as key and a bool as value
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	TMap<FGuid, bool> DoorsStatus;
 
 	//Saved Simon puzzle status
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	bool bSimonSolvedSave;
 
 	//Saved treasure index
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	int32 TreasureIndexSave;
 
 	//Create an array of GUID
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	TArray<FGuid> DestroyedPlatsSaved;
 
 	//Saved plat sequence
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere)
 	int32 PlatSequenceSaved;
 
 };

@@ -49,9 +49,7 @@ protected:
 
 	void CreateSave();
 
-	void loadProcess();
-
 	FString SaveName="Save1";
 
-	void CreateSaveName();
+	FString CreateSaveName();
 };
