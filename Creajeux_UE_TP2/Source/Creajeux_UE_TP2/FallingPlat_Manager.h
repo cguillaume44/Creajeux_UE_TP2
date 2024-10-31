@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BillboardComponent.h"
 #include "FallingPlat_Manager.generated.h"
 
 UCLASS()

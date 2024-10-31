@@ -21,16 +21,20 @@ void AScalePuzzle::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (OtherActor)
 	{
-		//add the weight of the overlapped actor to the current weight
-		currentWeight += OtherActor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
-		
-		//remap the current weight to the target weight between 0 and 1 can be greater than 1
-		//the remap is used in the setpercent of the progress bar
-		float TempWeight = currentWeight / targetWeight;
-		OnWeightChanged(TempWeight, SetBarColor(TempWeight));
-		if (DoorActor && currentWeight == targetWeight)
+		// Get the root component and cast it to UPrimitiveComponent
+		UPrimitiveComponent* RootComp = Cast<UPrimitiveComponent>(OtherActor->GetRootComponent());
+		if (RootComp && RootComp->IsSimulatingPhysics())
 		{
-			DoorActor->CheckOpenDoor();
+			// Add the weight of the overlapped actor to the current weight
+			currentWeight += RootComp->GetMass();
+
+			// Remap the current weight to the target weight between 0 and 1, can be greater than 1
+			float TempWeight = currentWeight / targetWeight;
+			OnWeightChanged(TempWeight, SetBarColor(TempWeight));
+			if (DoorActor && currentWeight == targetWeight)
+			{
+				DoorActor->CheckOpenDoor();
+			}
 		}
 	}
 }
@@ -40,13 +44,17 @@ void AScalePuzzle::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
 	
 	if (OtherActor)
 	{
-		//remove the weight of the overlapped actor to the current weight
-		currentWeight -= OtherActor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		// Get the root component and cast it to UPrimitiveComponent
+		UPrimitiveComponent* RootComp = Cast<UPrimitiveComponent>(OtherActor->GetRootComponent());
+		if (RootComp && RootComp->IsSimulatingPhysics())
+		{
+			// Remove the weight of the overlapped actor from the current weight
+			currentWeight -= RootComp->GetMass();
 
-		//remap the current weight to the target weight between 0 and 1 can be greater than 1
-		//the remap is used in the setpercent of the progress bar
-		float TempWeight = currentWeight / targetWeight;
-		OnWeightChanged(TempWeight, SetBarColor(TempWeight));
+			// Remap the current weight to the target weight between 0 and 1, can be greater than 1
+			float TempWeight = FMath::Clamp(currentWeight / targetWeight, 0.f, 1.f);
+			OnWeightChanged(TempWeight, SetBarColor(TempWeight));
+		}
 	}
 }
 
