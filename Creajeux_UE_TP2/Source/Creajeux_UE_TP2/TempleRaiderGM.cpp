@@ -322,6 +322,7 @@ void ATempleRaiderGM::SetQuality(int32 Quality)
             MyGameSettings->SetShadingQuality(0);
             MyGameSettings->SetVisualEffectQuality(0);
             MyGameSettings->SetFoliageQuality(0);
+			GEngine->Exec(GetWorld(), TEXT("r.VolumetricFog.GridSizeZ 64"));
             break;
         case 1:
             MyGameSettings->SetViewDistanceQuality(0);
@@ -334,6 +335,7 @@ void ATempleRaiderGM::SetQuality(int32 Quality)
             MyGameSettings->SetShadingQuality(1);
             MyGameSettings->SetVisualEffectQuality(1);
             MyGameSettings->SetFoliageQuality(1);
+            GEngine->Exec(GetWorld(), TEXT("r.VolumetricFog.GridSizeZ 64"));
             break;
         case 2:
             MyGameSettings->SetViewDistanceQuality(3);
@@ -346,6 +348,7 @@ void ATempleRaiderGM::SetQuality(int32 Quality)
             MyGameSettings->SetShadingQuality(3);
             MyGameSettings->SetVisualEffectQuality(3);
             MyGameSettings->SetFoliageQuality(3);
+            GEngine->Exec(GetWorld(), TEXT("r.VolumetricFog.GridSizeZ 64"));
             break;
         default:
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Quality not found"));
