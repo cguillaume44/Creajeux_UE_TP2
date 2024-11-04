@@ -11,6 +11,10 @@
 #include "KeyTrigger.h"
 #include "FallingPlat_Manager.h"
 #include "FallingPlat.h"
+#include "GameFramework/GameUserSettings.h"
+
+
+
 
 
 void ATempleRaiderGM::BeginPlay()
@@ -21,6 +25,9 @@ void ATempleRaiderGM::BeginPlay()
 	TryToLoad();
 
 }
+#pragma region SaveCode
+
+
 
 FString ATempleRaiderGM::CreateSaveName()
 {
@@ -285,3 +292,101 @@ void ATempleRaiderGM::CreateSave()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Save created");
 	TryToSave();
 }
+#pragma endregion
+
+
+#pragma region QualityCode
+
+void ATempleRaiderGM::SetQuality(int32 Quality)
+{
+	//Get the game user settings
+	UGameUserSettings* MyGameSettings = GEngine->GameUserSettings;
+    if (MyGameSettings)
+    {
+        MyGameSettings->SetScreenResolution(FIntPoint(1920, 1080));
+        MyGameSettings->SetVSyncEnabled(false);
+        MyGameSettings->SetFrameRateLimit(0);
+		MyGameSettings->SetFullscreenMode(EWindowMode::Fullscreen);
+
+		//Lots of copy paste here but it's better than a wrapper function in my opinion (readability)
+        switch (Quality)
+        {
+        case 0:
+            MyGameSettings->SetViewDistanceQuality(0);
+            MyGameSettings->SetAntiAliasingQuality(0);
+            MyGameSettings->SetPostProcessingQuality(0);
+            MyGameSettings->SetShadowQuality(1);
+            MyGameSettings->SetGlobalIlluminationQuality(0);
+            MyGameSettings->SetReflectionQuality(0);
+            MyGameSettings->SetTextureQuality(1);
+            MyGameSettings->SetShadingQuality(0);
+            MyGameSettings->SetVisualEffectQuality(0);
+            MyGameSettings->SetFoliageQuality(0);
+            break;
+        case 1:
+            MyGameSettings->SetViewDistanceQuality(0);
+            MyGameSettings->SetAntiAliasingQuality(0);
+            MyGameSettings->SetPostProcessingQuality(3);
+            MyGameSettings->SetShadowQuality(3);
+            MyGameSettings->SetGlobalIlluminationQuality(1);
+            MyGameSettings->SetReflectionQuality(1);
+            MyGameSettings->SetTextureQuality(1);
+            MyGameSettings->SetShadingQuality(1);
+            MyGameSettings->SetVisualEffectQuality(1);
+            MyGameSettings->SetFoliageQuality(1);
+            break;
+        case 2:
+            MyGameSettings->SetViewDistanceQuality(3);
+            MyGameSettings->SetAntiAliasingQuality(3);
+            MyGameSettings->SetPostProcessingQuality(3);
+            MyGameSettings->SetShadowQuality(3);
+            MyGameSettings->SetGlobalIlluminationQuality(3);
+            MyGameSettings->SetReflectionQuality(3);
+            MyGameSettings->SetTextureQuality(3);
+            MyGameSettings->SetShadingQuality(3);
+            MyGameSettings->SetVisualEffectQuality(3);
+            MyGameSettings->SetFoliageQuality(3);
+            break;
+        default:
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Quality not found"));
+            break;
+        }
+        MyGameSettings->ApplySettings(true);
+    }
+
+	
+
+}
+
+void ATempleRaiderGM::DisplayFramerateStats(bool bDisplay)
+{
+    if (bDisplay)
+	{
+		//Run the command stat fps
+		GEngine->Exec(GetWorld(), TEXT("stat fps"));
+        GEngine->Exec(GetWorld(), TEXT("stat game"));
+        GEngine->Exec(GetWorld(), TEXT("stat UNIT"));
+        GEngine->Exec(GetWorld(), TEXT("stat UnitGraph"));
+
+    }
+	else
+	{
+		//Run the command stat none
+		GEngine->Exec(GetWorld(), TEXT("stat none"));
+	}
+}
+
+void ATempleRaiderGM::RunQualityBenchmark()
+{
+	//Get the game user settings and apply the benchmark
+	UGameUserSettings* MyGameSettings = GEngine->GameUserSettings;
+	if (MyGameSettings)
+	{
+		MyGameSettings->RunHardwareBenchmark(2, 1 ,1 );
+        //apply the benchmark
+        MyGameSettings->ApplyHardwareBenchmarkResults();
+	}
+
+}
+
+#pragma endregion

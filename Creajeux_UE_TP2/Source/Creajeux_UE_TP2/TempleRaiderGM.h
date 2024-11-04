@@ -15,38 +15,44 @@ class CREAJEUX_UE_TP2_API ATempleRaiderGM : public AGameModeBase
 	GENERATED_BODY()
 public:
 
-	//create a ufunction bp callable called try to save
+	//################ SAVE SETTINGS ################
+
 	UFUNCTION(BlueprintCallable)
 	void TryToSave();
 
-	//create a ufunction bp callable called try to save
 	UFUNCTION(BlueprintCallable)
 	void TryToLoad();
 
-	//create a ufunction bp callable called try to save
 	UFUNCTION(BlueprintCallable)
 	void DeleteSave();
 
-	//Saved Simon puzzle status
 	UPROPERTY(EditAnywhere)
 	bool bSimonSolved=false;
 
-	//Saved treasure index
 	UPROPERTY(EditAnywhere)
 	int32 TreasureIndex=0;
 
-	//Saved treasure index
 	UPROPERTY(EditAnywhere)
 	TArray<FGuid> DestroyedPlats;
 
-	//Saved treasure index
 	UPROPERTY(EditAnywhere)
 	int32 PlatSequence;
+
+	//################ QUALITY SETTINGS ################
+	UFUNCTION(BlueprintCallable, Category = "Quality settings")
+	void SetQuality(int32 Quality=1);
+
+	UFUNCTION(BlueprintCallable, Category = "Quality settings")
+	void DisplayFramerateStats(bool bDisplay);
+
+	UFUNCTION(BlueprintCallable, Category = "Quality settings")
+	void RunQualityBenchmark();
 
 protected:
 	//call begin play
 	virtual void BeginPlay() override;
 
+	//################ SAVE SETTINGS ################
 	void CreateSave();
 
 	FString SaveName="Save1";
