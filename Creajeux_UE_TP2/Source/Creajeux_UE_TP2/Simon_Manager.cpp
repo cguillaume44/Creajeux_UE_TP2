@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Door.h"
 #include "TempleRaiderGM.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
 ASimon_Manager::ASimon_Manager()
@@ -193,7 +195,16 @@ void ASimon_Manager::TriggerWinProcess()
 		if (Actor)
 		{
 			ASimon_Button* Button = Cast<ASimon_Button>(Actor);
-			Button->Destroy();
+			if (Button)
+			{
+				if (NiagaraSystem)
+				{
+					//spawn the niagara system at the button transform
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraSystem,
+						Button->GetActorLocation(), Button->GetActorRotation(), Button->GetActorScale());
+				}
+				Button->Destroy();
+			}
 		}
 
 	}

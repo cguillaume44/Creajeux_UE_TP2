@@ -7,6 +7,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "TempleRaiderGM.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Constructor
 AKeyTrigger::AKeyTrigger()
@@ -27,6 +29,7 @@ AKeyTrigger::AKeyTrigger()
 
 	SetActorHiddenInGame(false);
 }
+
 
 void AKeyTrigger::BeginPlay()
 {
@@ -60,6 +63,12 @@ void AKeyTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 					Key->Destroy();
 				}
 			}
+			//Spawn the Niagara system at the mesh compo location
+			PlayNiagaraSystem(MeshComponent1);
+			PlayNiagaraSystem(MeshComponent2);
+			PlayNiagaraSystem(MeshComponent3);
+			PlayNiagaraSystem(MeshComponent4);
+
 			//Destroy the key trigger
 			Destroy();
 		}
@@ -107,5 +116,14 @@ void AKeyTrigger::AttachKeyAndCount(AActor* OtherActor)
 		OtherActor->SetActorRotation(FRotator(0,90,0));
 		OtherActor->Tags.Remove("Grabbable");
 		KeyCount++;
+	}
+}
+
+void AKeyTrigger::PlayNiagaraSystem(USceneComponent* Compo)
+{
+	if (NiagaraSystem && Compo)
+	{
+		//Spawn the Niagara system at the given location
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraSystem, Compo->GetComponentLocation(), Compo->GetComponentRotation(), Compo->GetComponentScale());
 	}
 }

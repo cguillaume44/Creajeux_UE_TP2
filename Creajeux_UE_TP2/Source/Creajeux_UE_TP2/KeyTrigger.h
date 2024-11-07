@@ -34,6 +34,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* MeshComponent4;
 
+	//Niagara system property
+	UPROPERTY(EditAnywhere, Category = "Niagara")
+	class UNiagaraSystem* NiagaraSystem;
+
+	void PlayNiagaraSystem(USceneComponent *Compo);
+
 	//Pointer to a door actor object in the level
 	UPROPERTY(EditAnywhere, Category = "Default")
 	class ADoor* DoorActor;

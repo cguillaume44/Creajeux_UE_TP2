@@ -26,6 +26,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Niagara system property
+	UPROPERTY(EditAnywhere, Category = "Niagara")
+	class UNiagaraSystem* NiagaraSystem;
+
 	class ASimon_Button* LastButtonPressed;
 	bool bIsPlayingSequence;
 	int32 GuessIndex = 0;
