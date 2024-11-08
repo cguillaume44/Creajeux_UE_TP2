@@ -55,7 +55,20 @@ protected:
 
 	bool CanGrabActor(FHitResult Hit);
 
+	//##### Niagara #####
+	UPROPERTY(EditDefaultsOnly, Category = "Niagara")
+	class UNiagaraComponent* NiagaraComponent;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Niagara")
+	FLinearColor NiagColorDefault;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Niagara")
+	FLinearColor NiagColorColli;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Niagara")
+	FLinearColor NiagColorHeld;
+
+	void UpdateNiagaraCursor();
 
 private:
 	bool bSavedPhysSim;

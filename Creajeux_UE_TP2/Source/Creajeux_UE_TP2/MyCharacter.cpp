@@ -5,6 +5,9 @@
 #include "Camera/CameraComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -19,6 +22,10 @@ AMyCharacter::AMyCharacter()
 
 	//Create the physic handle compo
 	HandleCompo = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("HandleCompo"));
+
+	//Create the Niagara component
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	NiagaraComponent->SetupAttachment(RootComponent);
 }
 
 void AMyCharacter::Interact()
@@ -85,6 +92,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	CamPos = CameraComponent->GetComponentLocation();
 	CheckSight();
 	UpdtadeHandleLocation();
+	UpdateNiagaraCursor();
 }
 
 // Called to bind functionality to input
@@ -100,7 +108,7 @@ void AMyCharacter::UpdtadeHandleLocation()
 	FVector HandleLocation = CamPos + CameraComponent->GetForwardVector() * HoldDistance;
 	HandleCompo->SetTargetLocation(HandleLocation);
 	//Draw a debub point at the handle location
-	DrawDebugPoint(GetWorld(), HandleLocation, 10, FColor::Green, false, 0);
+	//DrawDebugPoint(GetWorld(), HandleLocation, 10, FColor::Green, false, 0);
 }
 
 void AMyCharacter::CheckSight()
@@ -109,10 +117,10 @@ void AMyCharacter::CheckSight()
 	FCollisionQueryParams TraceParams;
 	FVector End = CamPos + CameraComponent->GetForwardVector() * SightLength;
 	GetWorld()->LineTraceSingleByChannel(SightRaycast, CamPos, End, ECC_Visibility, TraceParams);
-	DrawDebugSphere(GetWorld(),
-		SightRaycast.bBlockingHit ? SightRaycast.Location : SightRaycast.TraceEnd,
-		10, 10,
-		SightRaycast.bBlockingHit ? FColor::Blue : FColor::Red, false, 0);
+	//DrawDebugSphere(GetWorld(),
+	//	SightRaycast.bBlockingHit ? SightRaycast.Location : SightRaycast.TraceEnd,
+	//	10, 10,
+	//	SightRaycast.bBlockingHit ? FColor::Blue : FColor::Red, false, 0);
 
 	if (SightRaycast.bBlockingHit && SightRaycast.GetActor() && IsImplementingInteractInterface(SightRaycast.GetActor()))
 	{
@@ -138,6 +146,30 @@ bool AMyCharacter::CanGrabActor(FHitResult Hit)
 		IsImplementingInteractInterface(Hit.GetActor()) &&
 		SightRaycast.GetActor()->ActorHasTag("Grabbable");
 }
+
+void AMyCharacter::UpdateNiagaraCursor()
+{
+	if (NiagaraComponent && NiagaraComponent->GetAsset())
+	{
+		FVector NiagaraLocation;
+		FLinearColor NiagColor;
+
+		if (HandleCompo->GetGrabbedComponent())
+		{
+			NiagaraLocation = HandleCompo->GetGrabbedComponent()->GetComponentLocation();
+			NiagColor = NiagColorHeld;
+		}
+		else
+		{
+			NiagaraLocation = SightRaycast.bBlockingHit ? SightRaycast.Location : SightRaycast.TraceEnd;
+			NiagColor = SightRaycast.bBlockingHit ? NiagColorColli : NiagColorDefault;
+		}
+
+		NiagaraComponent->SetNiagaraVariableLinearColor(FString("CursorColor"), NiagColor);
+		NiagaraComponent->SetNiagaraVariablePosition(FString("Position"), NiagaraLocation);
+	}
+}
+
 void AMyCharacter::ResetActorInSight()
 {
 	if (ActorInSight && IsImplementingInteractInterface(ActorInSight))
