@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
+#include "Components/SplineComponent.h"
 
 FVector UMyBlueprintLibrary::GetDirectionBetweenTwoActors(AActor* FromActor, AActor* ToActor)
 {
@@ -145,4 +146,180 @@ bool UMyBlueprintLibrary::CheckIfActorIsInLineOfSight(AActor* FromActor, AActor*
 
 
     return !HitResult.bBlockingHit;
+}
+
+TArray<UActorComponent*> UMyBlueprintLibrary::GetComponentsOfClass(AActor* Actor, TSubclassOf<UActorComponent> ComponentClass)
+{
+	if (Actor)
+	{
+		TArray<UActorComponent*> Components;
+		Actor->GetComponents(ComponentClass, Components);
+		return Components;
+	}
+	return TArray<UActorComponent*>(); // Return an empty array if the actor is 'null'
+}
+
+FVector2D UMyBlueprintLibrary::GetTextureDimensions(UTexture* Texture)
+{
+	if (Texture)
+	{
+		return FVector2D(Texture->GetSurfaceWidth(), Texture->GetSurfaceHeight());
+	}
+	return FVector2D::ZeroVector;
+}
+
+TArray<FVector> UMyBlueprintLibrary::ApplyTransformToPoints(const TArray<FVector>& Points, FTransform Transform, bool bWorldSpace)
+{
+    if (Points.IsValidIndex(0))
+    {
+	    TArray<FVector> TransformedPoints;
+	    for (const FVector Point : Points)
+		    {
+		    FVector TransformedPoint = bWorldSpace ? Transform.TransformPosition(Point) : Transform.InverseTransformPosition(Point);
+		    TransformedPoints.Add(TransformedPoint);
+		    }
+		return TransformedPoints;
+    }
+	return TArray<FVector>(); // Return an empty array if the input array is empty
+}
+
+TArray<AActor*> UMyBlueprintLibrary::GetActorsOfClassInRadius(UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, FVector Location, float Radius)
+{
+	if (!WorldContextObject) return TArray<AActor*>();
+	UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
+	TArray<AActor*> Actors;
+	for (TActorIterator<AActor> It(World, ActorClass); It; ++It)
+	{
+		if (It && FVector::Dist(Location, It->GetActorLocation()) <= Radius)
+		{
+			Actors.Add(*It);
+		}
+	}
+	return Actors;
+}
+
+int32 UMyBlueprintLibrary::CalculateMemoryFootprint(UObject* Object)
+{
+	if (Object)
+	{
+		return Object->GetResourceSizeBytes(EResourceSizeMode::Exclusive);
+	}
+	return 0;
+}
+
+void UMyBlueprintLibrary::DrawDebugBoundingBox(AActor* Actor, FLinearColor Color, float Duration, float Thickness)
+{
+	if (Actor)
+	{
+		FVector Origin;
+		FVector BoxExtent;
+		Actor->GetActorBounds(true, Origin, BoxExtent);
+        DrawDebugBox(Actor->GetWorld(), Origin, BoxExtent, Color.ToFColor(true), false, Duration, 0, Thickness);
+	}
+}
+
+TArray<int32> UMyBlueprintLibrary::GetMeshVertexCount(UStaticMeshComponent* MeshComponent, int32& NumLOD)
+{
+	if (MeshComponent)
+	{
+		TArray<int32> VertexCounts;
+		UStaticMesh* StaticMesh = MeshComponent->GetStaticMesh();
+		if (StaticMesh)
+		{
+			NumLOD = StaticMesh->GetRenderData()->LODResources.Num();
+			for (int32 i = 0; i < NumLOD; i++)
+			{
+				VertexCounts.Add(StaticMesh->GetRenderData()->LODResources[i].VertexBuffers.PositionVertexBuffer.GetNumVertices());
+			}
+		}
+		return VertexCounts;
+	}
+	return TArray<int32>(); // Return an empty array if the mesh component is 'null'
+}
+
+void UMyBlueprintLibrary::ExportActorsToCSV(UObject* WorldContextObject, FString FileName)
+{
+	if (!WorldContextObject) return;
+	UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
+	FString CSV;
+    //Build csv header columns
+	CSV += "Name,Class,LocationX,LocationY,LocationZ\n";
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		AActor* Actor = *It;
+		FString ActorName = Actor->GetName();
+		FString ActorClass = Actor->GetClass()->GetName();
+		FString ActorLocX = FString::SanitizeFloat(Actor->GetActorLocation().X);
+		FString ActorLocY = FString::SanitizeFloat(Actor->GetActorLocation().Y);
+		FString ActorLocZ = FString::SanitizeFloat(Actor->GetActorLocation().Z);
+		CSV += ActorName + "," + ActorClass + "," + ActorLocX + "," + ActorLocY + "," + ActorLocZ + "\n";
+	}
+	FString SaveDirectory = FPaths::ProjectSavedDir();
+    if (!FileName.Contains(".csv"))
+    {
+        FileName = FileName + ".csv";
+    }
+	FString FinalPath = SaveDirectory + FileName;
+	FFileHelper::SaveStringToFile(CSV, *FinalPath);
+}
+
+UTexture2D* UMyBlueprintLibrary::CreateProceduralNoiseTexture(int32 Width, int32 Height, float Scale, float NoiseStrength, FLinearColor Color)
+{
+	UTexture2D* Texture = UTexture2D::CreateTransient(Width, Height);
+	Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+	Texture->SRGB = 0;
+	//adds the object to the root set, which is a collection of objects 
+	// that the garbage collector will not automatically clean up.
+	//Dangerous for memory leak, use Texture->RemoveFromRoot(); to remove it from the root set in another function?
+	Texture->AddToRoot();
+	//update the texture resource to reflect the changes made to the texture object
+	Texture->UpdateResource();
+	FColor* Pixels = static_cast<FColor*>(Texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE));
+	for (int32 Y = 0; Y < Height; Y++)
+	{
+		for (int32 X = 0; X < Width; X++)
+		{
+			float Value = FMath::PerlinNoise2D(FVector2D(X, Y) * Scale) * NoiseStrength;
+			Pixels[Y * Width + X] = FLinearColor(Color.R + Value, Color.G + Value, Color.B + Value, Color.A).ToFColor(true);
+		}
+	}
+	Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+	Texture->UpdateResource();
+	return Texture;
+}
+
+void UMyBlueprintLibrary::TogglePhysicsSimulation(AActor* Actor, bool bSimulate)
+{
+	if (Actor)
+	{
+		TArray<UPrimitiveComponent*> PrimitiveComponents;
+		Actor->GetComponents<UPrimitiveComponent>(PrimitiveComponents);
+		for (UPrimitiveComponent* PrimComp : PrimitiveComponents)
+		{
+			if (bSimulate)
+			{
+				PrimComp->SetMobility(EComponentMobility::Movable);
+			}
+			PrimComp->SetSimulatePhysics(bSimulate);
+		}
+	}
+}
+
+float UMyBlueprintLibrary::CalculateActorMass(AActor* Actor)
+{
+	if (Actor)
+	{
+		float TotalMass = 0.0f;
+		TArray<UPrimitiveComponent*> PrimitiveComponents;
+		Actor->GetComponents<UPrimitiveComponent>(PrimitiveComponents);
+		for (UPrimitiveComponent* PrimComp : PrimitiveComponents)
+		{
+			if (PrimComp->Mobility == EComponentMobility::Movable && PrimComp->IsSimulatingPhysics())
+			{
+				TotalMass += PrimComp->GetMass();
+			}
+		}
+		return TotalMass;
+	}
+	return 0.0f;
 }

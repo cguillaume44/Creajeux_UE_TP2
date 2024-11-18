@@ -63,4 +63,48 @@ public:
     // Checks if one actor is in the line of sight of another actor using a specified trace channel.
     UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
     static bool CheckIfActorIsInLineOfSight(AActor* FromActor, AActor* ToActor, ECollisionChannel TraceChannel = ECC_Visibility, bool bDrawDebug=false);
+
+    //Retrieves all components of a specified class attached to an actor.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static TArray<UActorComponent*> GetComponentsOfClass(AActor* Actor, TSubclassOf<UActorComponent> ComponentClass);
+
+    //Retrieves the width and height of a texture asset.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static FVector2D GetTextureDimensions(UTexture* Texture);
+
+    //Applies a transform to an array of FVector points, returning the new positions in world or local space.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static TArray<FVector> ApplyTransformToPoints(const TArray<FVector>& Points, FTransform Transform, bool bWorldSpace = true);
+
+    //Retrieves all actors of a specified class within a certain radius of a location.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static TArray<AActor*> GetActorsOfClassInRadius(UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, FVector Location, float Radius);
+
+    //Calculates the memory footprint of a given UObject and its components.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+    static int32 CalculateMemoryFootprint(UObject* Object);
+
+    //Draws a debug bounding box around an actor or component.
+	UFUNCTION(BlueprintCallable, Category = "Custom BP Lib")
+	static void DrawDebugBoundingBox(AActor* Actor, FLinearColor Color = FLinearColor::Red, float Duration = 0.0f, float Thickness = 1.0f);
+
+    //Calculates the total number of vertices in a static mesh or skeletal mesh.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static TArray<int32> GetMeshVertexCount(UStaticMeshComponent* MeshComponent, int32& NumLOD);
+
+    //Exports the names, locations, and classes of all actors in the level to a CSV file.
+	UFUNCTION(BlueprintCallable, Category = "Custom BP Lib")
+	static void ExportActorsToCSV(UObject* WorldContextObject, FString FileName);
+
+    //Creates a procedural Perlin noise texture at runtime.
+	UFUNCTION(BlueprintCallable, Category = "Custom BP Lib")
+	static UTexture2D* CreateProceduralNoiseTexture(int32 Width, int32 Height, float Scale, float NoiseStrength, FLinearColor Color);
+
+    //Toggles the physics simulation state for all physics-enabled components of an actor.
+	UFUNCTION(BlueprintCallable, Category = "Custom BP Lib")
+	static void TogglePhysicsSimulation(AActor* Actor, bool bSimulate);
+
+    // Calculates the combined mass of all physics-enabled components in an actor.
+	UFUNCTION(BlueprintPure, Category = "Custom BP Lib")
+	static float CalculateActorMass(AActor* Actor);
 };
